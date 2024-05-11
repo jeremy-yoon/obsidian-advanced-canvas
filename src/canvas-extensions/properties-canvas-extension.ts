@@ -39,7 +39,7 @@ export default class PropertiesCanvasExtension {
       canvas.wrapperEl.classList.remove(cssclass)
     })
 
-    this.previousCssclasses = canvas.metadata.properties?.cssclasses || []
+    this.previousCssclasses = canvas?.metadata.properties?.cssclasses || []
     this.previousCssclasses.forEach((cssclass) => {
       canvas.wrapperEl.classList.add(cssclass)
     })
@@ -69,9 +69,11 @@ class PropertiesModal extends Modal {
       .setTooltip("Add classes to the canvas wrapper element. Separate multiple classes with spaces.")
       .addText((text) =>
         text
-          .setValue(this.canvas.metadata.properties?.cssclasses?.join(' '))
+          .setValue(this.canvas.metadata?.properties?.cssclasses?.join(' '))
           .onChange((value) => {
+            this.canvas.metadata = this.canvas.metadata || {}
             this.canvas.metadata.properties = this.canvas.metadata.properties || {}
+            
             this.canvas.metadata.properties.cssclasses = value.split(' ')
           })
       ).settingEl.classList.add('properties-field')
