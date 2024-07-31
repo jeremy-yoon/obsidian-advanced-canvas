@@ -688,6 +688,7 @@ export const createNode = (
 			newNode.setData(nodeData as CanvasNodeData);
 		} else {
 			// nodeData에 type이 없는 경우 처리 (예: 기본값 할당 또는 오류 처리)
+			console.log("nodeData.type is required", nodeData);
 			throw new Error("nodeData.type is required");
 		}
 	}

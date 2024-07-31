@@ -26,7 +26,7 @@ const NOTE_MAX_WIDTH = 400;
 
 const apiModel = "gpt-3.5-turbo";
 
-const apiKey = "YOUR_API";
+const apiKey = "";
 
 const systemPrompt = "SYSTEM PROMPT: ";
 
@@ -72,6 +72,8 @@ export function noteGenerator(
 
 		await visitNodeAndAncestors(node, async (n: CanvasNode) => {
 			const text = await readNodeContent(n);
+			console.log("visitNodeAndAncestors text:", text);
+			//이게 순회하면서 찾는거임
 			if (text && isSystemPromptNode(text)) {
 				foundPrompt = text.replace("SYSTEM PROMPT", "").trim();
 				return false;
@@ -102,7 +104,7 @@ export function noteGenerator(
 
 		// Note: We are not checking for system prompt longer than context window.
 		// That scenario makes no sense, though.
-		const systemPrompt2 = systemPrompt || (await getSystemPrompt(node));
+		const systemPrompt2 = await getSystemPrompt(node);
 		if (systemPrompt2) {
 			tokenCount += encoding.encode(systemPrompt2).length;
 		}
@@ -115,6 +117,7 @@ export function noteGenerator(
 			if (maxDepth && depth > maxDepth) return false;
 
 			const nodeData = node.getData();
+			console.log("nodeData:", nodeData);
 			let nodeText = (await readNodeContent(node))?.trim() || "";
 			const inputLimit = 10000;
 
@@ -135,10 +138,6 @@ export function noteGenerator(
 					const keepTokens = nodeTokens.slice(
 						0,
 						inputLimit - tokenCount - 1
-						// * needed because very large context is a little above
-						// * should this be a number from settings.maxInput ?
-						// TODO
-						// (nodeTokens.length > 100000 ? 20 : 1)
 					);
 					const truncateTextTo = encoding.decode(keepTokens).length;
 					console.log(
@@ -193,7 +192,6 @@ export function noteGenerator(
 	};
 
 	const generateNote = async (question?: string) => {
-		console.log("noteGenerator4");
 		if (!canCallAI()) return;
 
 		console.log("Creating AI note");
@@ -203,7 +201,6 @@ export function noteGenerator(
 			console.log("No active canvas");
 			return;
 		}
-		// console.log({ canvas });
 
 		await canvas.requestFrame();
 
@@ -220,11 +217,14 @@ export function noteGenerator(
 		if (node) {
 			// Last typed characters might not be applied to note yet
 			// await canvas.requestSave();
-
+			console.log("node:", node, "question:", question);
 			const { messages, tokenCount } = await buildMessages(node, {
+				systemPrompt:
+					node.getData().widgetType === "knowledge"
+						? systemPrompt
+						: "knowledge: " + systemPrompt,
 				prompt: question,
 			});
-			// console.log({ messages });
 			if (!messages.length) return;
 
 			let created: CanvasNode;
@@ -240,6 +240,7 @@ export function noteGenerator(
 					{
 						color: assistantColor,
 						chat_role: "assistant",
+						type: "text",
 					},
 					question
 				);
@@ -255,7 +256,7 @@ export function noteGenerator(
 			try {
 				let firstDelta = true;
 				let accumulatedText = ""; // 누적된 텍스트 저장
-
+				console.log("messages:", messages);
 				await streamResponse(
 					apiKey,
 					messages,
@@ -309,9 +310,9 @@ export function noteGenerator(
 					canvas.removeNode(created);
 				}
 			}
-			await sleep(200);
-			await canvas.requestSave();
-			// console.log("캔버스 저장 요청됨:", created, created.text);
+			// await sleep(5000);
+			// await canvas.requestSave();
+			// await console.log("캔버스 저장 요청됨:", created);
 		}
 	};
 	return { generateNote, buildMessages };

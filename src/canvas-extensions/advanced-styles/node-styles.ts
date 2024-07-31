@@ -64,7 +64,6 @@ export default class NodeStylesExtension extends CanvasExtension {
 			const toNode = selectionNodeData[1];
 			const { generateNote } = noteGenerator(app);
 			generateNote();
-			console.log("noteGenerator");
 		});
 
 		CanvasHelper.createStyleDropdownMenu(
@@ -95,6 +94,7 @@ export default class NodeStylesExtension extends CanvasExtension {
 
 			node.setData({
 				...nodeData,
+				widgetType: value,
 				styleAttributes: {
 					...nodeData.styleAttributes,
 					[attribute.datasetKey]: value,

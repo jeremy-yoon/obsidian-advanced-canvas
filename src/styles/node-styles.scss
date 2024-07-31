@@ -60,8 +60,37 @@
 		-webkit-mask-size: 100%;
 	}
 
-	&[data-shape="pill"] .canvas-node-container {
-		border-radius: 5000px;
+	// 공통 스타일
+	.canvas-node-container {
+		padding-top: 20px; // 타이틀을 위한 상단 패딩 추가
+
+		// 공통 타이틀 영역 스타일 (가상 요소)
+		&::before {
+			content: attr(data-shape);
+			position: relative;
+			top: -15px; // 텍스트 위치 조정
+			font-size: 18px;
+			font-weight: bold;
+			text-align: center;
+			padding: 0 5px; // 텍스트 주위 패딩 설정 (필요시)
+		}
+	}
+
+	// 종류별 스타일
+	&[data-shape="structure"] .canvas-node-container::before {
+		content: "구조";
+	}
+
+	&[data-shape="knowledge"] .canvas-node-container::before {
+		content: "기반지식";
+	}
+
+	&[data-shape="persona"] .canvas-node-container::before {
+		content: "페르소나";
+	}
+
+	&[data-shape="goal"] .canvas-node-container::before {
+		content: "목표";
 	}
 
 	&[data-shape="diamond"] {

@@ -58,6 +58,7 @@ export async function visitNodeAndAncestors(
 		const parents = getNodeParents(currentNode);
 		for (const parent of parents) {
 			if (!visited.has(parent.node.id)) {
+				console.log("parent:", parent);
 				queue.push({
 					node: parent.node,
 					depth: depth + 1,
